@@ -512,7 +512,15 @@ _HERO = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='NPC_DOTA_HERO_PANGOLIE', index=114, number=120,
+      name='NPC_DOTA_HERO_PANGOLIER', index=114, number=120,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NPC_DOTA_HERO_MARS', index=115, number=129,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NPC_DOTA_HERO_GRIMSTROKE', index=115, number=121,
       serialized_options=None,
       type=None),
   ],

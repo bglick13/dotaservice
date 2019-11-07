@@ -178,61 +178,8 @@ class DotaGame(object):
         os.symlink(src=bot_path, dst=self.dota_bot_path)
         return bot_path
 
-    # async def monitor_log(self):
-    #     abs_glob = os.path.join(self.bot_path, self.CONSOLE_LOGS_GLOB)
-    #     while True:
-    #         # Console logs can get split from `$stem.log` into `$stem.$number.log`.
-    #         for filename in glob.glob(abs_glob):
-    #             with open(filename) as f:
-    #                 for line in f:
-    #                     # Demo line always comes before the LUADRY signal.
-    #                     if self.demo_path_rel is None:
-    #                         m_demo = self.RE_DEMO.search(line)
-    #                         if m_demo:
-    #                             self.demo_path_rel = m_demo.group(1)
-    #                             logger.debug("demo_path_rel={}".format(self.demo_path_rel))
-    #
-    #                     if self.players is None:
-    #                         m_players = self.RE_PLAYERS.search(line)
-    #                         if m_players:
-    #                             players_json = m_players.group(1)
-    #                             self.players = json.loads(players_json)
-    #                             logger.debug('players={}'.format(self.players))
-    #
-    #                     m_luadry = self.RE_LUARDY.search(line)
-    #                     if m_luadry:
-    #                         config_json = m_luadry.group(1)
-    #                         lua_config = json.loads(config_json)
-    #                         logger.debug('lua_config={}'.format(lua_config))
-    #                         self.lua_config_future.set_result(lua_config)
-    #                         return
-    #         await asyncio.sleep(0.2)
-
-    # async def get_final_state_from_log(self):
-    #     """
-    #     Crawls the log for a winstate. Returns TEAM_RADIANT or TEAM_DIRE or None (not found).
-    #     """
-    #     abs_glob = os.path.join(self.bot_path, self.CONSOLE_LOGS_GLOB)
-    #     # Console logs can get split from `$stem.log` into `$stem.$number.log`.
-    #     for filename in glob.glob(abs_glob):
-    #         with open(filename) as f:
-    #             for line in f:
-    #                 m_win = self.RE_WIN.search(line)
-    #                 if m_win:
-    #                     key = m_win.group(1)
-    #                     if key == '1':
-    #                         return TEAM_RADIANT
-    #                     elif key == '0':
-    #                         return TEAM_DIRE
-    #     logger.warning('get_final_state_from_log() did not find a winner.')
-    #     return None
-
     def run(self):
         self._run_dota()
-        # Start the worldstate listener(s).
-        # for team_id in self.worldstate_queues:
-        #     asyncio.create_task(self._worldstate_listener(
-        #         port=self.PORT_WORLDSTATES[team_id], queue=self.worldstate_queues[team_id], team_id=team_id))
 
     def _run_dota(self):
         script_path = os.path.join(self.dota_path, self.DOTA_SCRIPT_FILENAME)
@@ -280,21 +227,6 @@ class DotaGame(object):
         print(*args)
         subprocess.call(args)
 
-        # create = asyncio.create_subprocess_exec(
-        #     *args,
-        #     stdin=asyncio.subprocess.PIPE, stdout=stdout, stderr=stdout,
-        # )
-        # self.process = await create
-        #
-        # task_monitor_log = asyncio.create_task(self.monitor_log())
-        #
-        # try:
-        #     await self.process.wait()
-        # except asyncio.CancelledError:
-        #     kill_processes_and_children(pid=self.process.pid)
-        #     raise
-
-
     def _move_recording(self):
         logger.info('::_move_recording')
         # Move the recording.
@@ -309,75 +241,6 @@ class DotaGame(object):
                 shutil.move(demo_path_abs, self.bot_path)
             except Exception as e:  # Fail silently.
                 logger.error(e)
-
-    # async def close(self):
-    #     logger.info('::close')
-    #
-    #     # If the process still exists, clean up.
-    #     if self.process.returncode is None:
-    #         logger.debug('flushing bot')
-    #         # Make the bot flush.
-    #         for team_id in [TEAM_RADIANT, TEAM_DIRE]:
-    #             self.write_action(data='FLUSH', team_id=team_id)
-    #         # Stop and move the recording
-    #         logger.debug('stopping recording')
-    #         self.process.stdin.write(b"tv_stoprecord\n")
-    #         self.process.stdin.write(b"quit\n")
-    #         await self.process.stdin.drain()
-    #         await asyncio.sleep(1)
-    #
-    #     self._move_recording()
-    #
-    #     if self.remove_logs:
-    #         shutil.rmtree(self.bot_path, ignore_errors=True)
-
-
-    # @classmethod
-    # async def _world_state_from_reader(cls, reader, team_id):
-    #     # Receive the package length.
-    #     data = await reader.read(cls.WORLDSTATE_PAYLOAD_BYTES)
-    #     if len(data) != cls.WORLDSTATE_PAYLOAD_BYTES:
-    #         # raise ValueError('Invalid worldstate payload')
-    #         return None
-    #     n_bytes = unpack("@I", data)[0]
-    #     # Receive the payload given the length.
-    #     data = await asyncio.wait_for(reader.read(n_bytes), timeout=2)
-    #     # Decode the payload.
-    #     world_state = CMsgBotWorldState()
-    #     world_state.ParseFromString(data)
-    #     logger.debug('Received world_state: dotatime={}, gamestate={}, team={}'.format(
-    #         world_state.dota_time, world_state.game_state, team_id))
-    #     return world_state
-    #
-    # @classmethod
-    # async def _worldstate_listener(self, port, queue, team_id):
-    #     while True:  # TODO(tzaman): finite retries.
-    #         try:
-    #             await asyncio.sleep(0.5)
-    #             reader, writer = await asyncio.open_connection('127.0.0.1', port)
-    #         except ConnectionRefusedError:
-    #             pass
-    #         else:
-    #             break
-    #     try:
-    #         while True:
-    #             # This reader is always going to need to keep going to keep the buffers flushed.
-    #             try:
-    #                 world_state = await self._world_state_from_reader(reader, team_id)
-    #                 if world_state is None:
-    #                     logger.info('Finishing worldstate listener (team_id={})'.format(team_id))
-    #                     return
-    #                 is_in_game = world_state.game_state in self.ACTIONABLE_GAME_STATES
-    #                 has_units = len(world_state.units) > 0
-    #                 if is_in_game and has_units:
-    #                     # Only regard worldstates that are actionable (in-game + has units).
-    #                     queue.put_nowait(world_state)
-    #             except DecodeError as e:
-    #                 logger.warning('Worldstate decode error.')
-    #                 pass
-    #     except asyncio.CancelledError:
-    #         raise
-
 
 class DotaService():
 
@@ -470,50 +333,6 @@ class DotaService():
 
         # Start dota.
         self.dota_game.run()
-        # asyncio.create_task(self.dota_game.run())
-
-        # # We first wait for the lua config. TODO(tzaman): do this in DotaGame?
-        # logger.info('::reset is awaiting lua config..')
-        # lua_config = await self.dota_game.lua_config_future
-        # logger.info('::reset: lua config received={}'.format(lua_config))
-        #
-        # # Cycle through the queue until its empty, then only using the latest worldstate.
-        # data = {TEAM_RADIANT: None, TEAM_DIRE: None}
-        # for team_id in self.dota_game.worldstate_queues:
-        #     try:
-        #         while True:
-        #             # Deplete the queue.
-        #             queue = self.dota_game.worldstate_queues[team_id]
-        #             data[team_id] = await asyncio.wait_for(queue.get(), timeout=0.5)
-        #     except asyncio.TimeoutError:
-        #         pass
-        #
-        # assert data[TEAM_RADIANT] is not None
-        # assert data[TEAM_DIRE] is not None
-        #
-        # if data[TEAM_RADIANT].dota_time != data[TEAM_DIRE].dota_time:
-        #     raise ValueError(
-        #         'dota_time discrepancy in depleting initial worldstate queue.\n'
-        #         'radiant={:.2f}, dire={:.2f}'.format(data[TEAM_RADIANT].dota_time, data[TEAM_DIRE].dota_time))
-        #
-        # last_dota_time = data[TEAM_RADIANT].dota_time
-        #
-        # # Now write the calibration file.
-        # config = {
-        #     'calibration_dota_time': last_dota_time
-        # }
-        # self.dota_game.write_live_config(data=config)
-        #
-        # # Return the reponse
-        # logger.info('sending response')
-        # await stream.send_message(InitialObservation(
-        #     world_state_radiant=data[TEAM_RADIANT],
-        #     world_state_dire=data[TEAM_DIRE],
-        #     players=self.players_to_pb(self.dota_game.players),
-        # ))
-        # logger.info('returning')
-        #
-        # return
 
     @staticmethod
     def players_to_pb(players):
@@ -528,65 +347,6 @@ class DotaService():
                 )
             )
         return players_pb
-
-#     async def observe(self, stream):
-#         logger.debug('DotaService::observe()')
-#
-#         request = await stream.recv_message()
-#         team_id = request.team_id
-#
-#         queue = self.dota_game.worldstate_queues[team_id]
-#
-#         try:
-#             data = await asyncio.wait_for(queue.get(), timeout=self.observe_timeout)
-#         except (asyncio.TimeoutError, asyncio.CancelledError):
-#             # A timeout probably means the game is done
-#             winstate = await self.dota_game.get_final_state_from_log()
-#             logger.info(winstate)
-#             await stream.send_message(Observation(
-#                 status=self.END_STATES[winstate],
-#                 team_id=team_id,
-#                 ))
-#             return
-#
-#         # Make sure indeed the queue is empty and we're entirely in sync.
-#         assert queue.qsize() == 0
-#
-#         # Return the reponse.
-#         await stream.send_message(Observation(
-#             status=Status.Value('OK'),
-#             world_state=data,
-#             team_id=team_id,
-#             ))
-#
-#     async def act(self, stream):
-#         logger.debug('DotaService::act()')
-#
-#         request = await stream.recv_message()
-#         team_id = request.team_id
-#         actions = MessageToDict(request.actions)
-#
-#         logger.debug('team_id={}, actions=\n{}'.format(team_id, pformat(actions)))
-#
-#         self.dota_game.write_action(data=actions, team_id=team_id)
-#
-#         # Return the reponse.
-#         await stream.send_message(Empty())
-#
-#
-# async def serve(server, *, host, port):
-#     await server.start(host, port)
-#     logger.info('DotaService {} serving on {}:{}'.format(__version__, host, port))
-#     try:
-#         await server.wait_closed()
-#     except asyncio.CancelledError:
-#         server.close()
-#         await server.wait_closed()
-#
-#
-# async def grpc_main(loop, handler, host, port):
-#     server = Server([handler], loop=loop)
-#     await serve(server, host=host, port=port)
 
 
 def main(grpc_host, grpc_port, dota_path, action_folder, remove_logs, log_level):

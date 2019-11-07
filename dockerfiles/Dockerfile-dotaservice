@@ -9,10 +9,11 @@ RUN apt-get -q update \
 
 WORKDIR /root
 
-RUN mkdir /root/dotaservice
+RUN ls /root
 COPY setup.py README.md /root/dotaservice/
 COPY dotaservice /root/dotaservice/dotaservice/
 RUN pip3.7 install --user -e /root/dotaservice/
 
 
 ENTRYPOINT ["python3.7", "-m", "dotaservice"]
+
