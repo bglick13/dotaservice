@@ -520,7 +520,7 @@ _HERO = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='NPC_DOTA_HERO_GRIMSTROKE', index=115, number=121,
+      name='NPC_DOTA_HERO_GRIMSTROKE', index=116, number=121,
       serialized_options=None,
       type=None),
   ],
@@ -741,7 +741,9 @@ NPC_DOTA_HERO_WINTER_WYVERN = 112
 NPC_DOTA_HERO_ARC_WARDEN = 113
 NPC_DOTA_HERO_MONKEY_KING = 114
 NPC_DOTA_HERO_DARK_WILLOW = 119
-NPC_DOTA_HERO_PANGOLIE = 120
+NPC_DOTA_HERO_PANGOLIER = 120
+NPC_DOTA_HERO_GRIMSTROKE = 121
+NPC_DOTA_HERO_MARS = 129
 OK = 0
 RESOURCE_EXHAUSTED = 8
 FAILED_PRECONDITION = 9

@@ -200,6 +200,7 @@ class DotaGame(object):
             '-nowatchdog',  # WatchDog will quit the game if e.g. the lua api takes a few seconds.
             '+clientport', '27006',  # Relates to steam client.
             '+dota_1v1_skip_strategy', '1',
+            '+dota_bot_set_difficulty', '3',
             '+dota_surrender_on_disconnect', '0',
             '+host_timescale', '{}'.format(self.host_timescale),
             '+hostname dotaservice',
