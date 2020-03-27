@@ -7,12 +7,12 @@ RUN apt-get -q update \
     python3.7-distutils \
  && curl -s https://bootstrap.pypa.io/get-pip.py | python3.7
 
-WORKDIR /root
+WORKDIR /data
 
-RUN ls /root
-COPY setup.py README.md /root/dotaservice/
-COPY dotaservice /root/dotaservice/dotaservice/
-RUN pip3.7 install --user -e /root/dotaservice/
+RUN ls /data
+COPY setup.py README.md /data/dotaservice/
+COPY dotaservice /data/dotaservice/dotaservice/
+RUN pip3.7 install --user -e /data/dotaservice/
 
 
 ENTRYPOINT ["python3.7", "-m", "dotaservice"]

@@ -19,8 +19,8 @@ RUN apt-get -q update \
 # Create Directory for SteamCMD
 # Download SteamCMD
 # Extract and delete archive
-RUN mkdir -p /root/steamcmd \
- && cd /root/steamcmd \
+RUN mkdir -p /data/steamcmd \
+ && cd /data/steamcmd \
  && curl -o steamcmd_linux.tar.gz "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" \
  && tar zxf steamcmd_linux.tar.gz \
  && rm steamcmd_linux.tar.gz
@@ -28,6 +28,6 @@ RUN mkdir -p /root/steamcmd \
 ARG user
 ARG pwd
 ARG guard
-RUN /root/steamcmd/steamcmd.sh +login ${user} ${pwd} ${guard} +app_update 570 +quit
+RUN /data/steamcmd/steamcmd.sh +login ${user} ${pwd} ${guard} +app_update 570 +quit
 
 RUN ln -s ~/steamcmd/linux64 ~/.steam/sdk64
